@@ -6,156 +6,129 @@
     <title>Monthly Worked Hours & Salary Calculator</title>
     <style>
         /* Add CSS styling here */
-body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    margin: 20px;
-}
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
 
-h1 {
-    color: #333;
-}
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
 
-#inputForm {
-    margin: 20px auto;
-    width: 80%;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-}
+        h1 {
+            color: #333;
+            text-align: center;
+        }
 
-label, input {
-    margin: 1px;
-}
+        #inputForm {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
 
-button {
-    padding: 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    cursor: pointer;
-}
+        label, input {
+            margin: 10px 0;
+        }
 
-table {
-    width: 80%;
-    margin: 20px auto;
-    border-collapse: collapse;
-}
+        input[type="date"],
+        input[type="time"],
+        input[type="number"] {
+            padding: 10px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
 
-table, th, td {
-    border: 1px solid #ddd;
-}
+        button#addEntry {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
 
-th, td {
-    padding: 8px;
-    text-align: center;
-}
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+        }
 
-#summary {
-    margin: 20px auto;
-    width: 80%;
-}
+        table, th, td {
+            border: 1px solid #ddd;
+        }
 
-#totalSalary {
-    font-weight: bold;
-}
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
 
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        #summary {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        #totalSalary {
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
-    <h1>Salary Calculator Based on Worked Hours</h1>
-    
-    <div id="inputForm">
-        <label for="date">Select a Date:</label>
-        <input type="date" id="date" name="date">
+    <div class="container">
+        <h1>Salary Calculator Based on Worked Hours</h1>
         
-        <label for="clockIn">Clock In:</label>
-        <input type="time" id="clockIn" required>
-        
-        <label for="clockOut">Clock Out:</label>
-        <input type="time" id="clockOut" required>
-        
-        <label for="breakHours">Break Hours:</label>
-        <input type="number" id="breakHours" step="0.01" min="0">
-        
-        <button id="addEntry">Add Entry</button>
+        <div id="inputForm">
+            <label for="date">Select a Date:</label>
+            <input type="date" id="date" name="date">
+            
+            <label for="clockIn">Clock In:</label>
+            <input type="time" id="clockIn" required>
+            
+            <label for="clockOut">Clock Out:</label>
+            <input type="time" id="clockOut" required>
+            
+            <label for="breakHours">Break Hours:</label>
+            <input type="number" id="breakHours" step="0.01" min="0">
+            
+            <button id="addEntry">Add Entry</button>
+        </div>
+
+        <table id="entriesTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Clock In</th>
+                    <th>Clock Out</th>
+                    <th>Break Hours</th>
+                    <th>Worked Hours</th>
+                    <th>Salary</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody id="entriesBody"></tbody>
+        </table>
+
+        <div id="summary">
+            <p>Total Worked Hours: <span id="totalHours">0</span> hours</p>
+            <p>Total Salary: £<span id="totalSalary">0</span></p>
+        </div>
     </div>
-
-    <table id="entriesTable">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Clock In</th>
-                <th>Clock Out</th>
-                <th>Break Hours</th>
-                <th>Worked Hours</th>
-                <th>Salary</th>
-            </tr>
-        </thead>
-        <tbody id="entriesBody"></tbody>
-    </table>
-
-    <div id="summary">
-        <p>Total Worked Hours: <span id="totalHours">0</span> hours</p>
-        <p>Total Salary: £<span id="totalSalary">0</span></p>
-    </div>
-
-    <script>
-       document.addEventListener("DOMContentLoaded", function () {
-    const entriesTable = document.getElementById("entriesTable");
-    const entriesBody = document.getElementById("entriesBody");
-    const totalHoursSpan = document.getElementById("totalHours");
-    const totalSalarySpan = document.getElementById("totalSalary");
-
-    let entries = [];
-
-    document.getElementById("addEntry").addEventListener("click", function () {
-        const date = document.getElementById("date").value; 
-        const clockIn = document.getElementById("clockIn").value;
-        const clockOut = document.getElementById("clockOut").value;
-        const breakHours = parseFloat(document.getElementById("breakHours").value) || 0;
-
-        if (date && clockIn && clockOut) {
-            const start = new Date(`${date}T${clockIn}`);
-            const end = new Date(`${date}T${clockOut}`);
-            const workedHours = (end - start) / (1000 * 60 * 60) - breakHours;
-            const salary = workedHours * hourlyRate; 
-
-            entries.push({ date, clockIn, clockOut, breakHours, workedHours, salary });
-
-            renderEntries();
-            calculateSummary();
-        }
-    });
-
-    function renderEntries() {
-        entriesBody.innerHTML = "";
-
-        entries.forEach((entry) => {
-            const row = entriesBody.insertRow();
-            row.innerHTML = `
-                <td>${entry.date}</td>
-                <td>${entry.clockIn}</td>
-                <td>${entry.clockOut}</td>
-                <td>${entry.breakHours.toFixed(2)}</td>
-                <td>${entry.workedHours.toFixed(2)}</td>
-                <td>£${entry.salary.toFixed(2)}</td>
-            `;
-        });
-    }
-
-    function calculateSummary() {
-        const totalHours = entries.reduce((acc, entry) => acc + entry.workedHours, 0);
-        const totalSalary = entries.reduce((acc, entry) => acc + entry.salary, 0);
-
-        totalHoursSpan.textContent = totalHours.toFixed(2);
-        totalSalarySpan.textContent = totalSalary.toFixed(2);
-    }
-
-    // calculating salary on hourly rate = £12.5
-    const hourlyRate = 12.5;
-});
- 
-    </script>
-</body>
-</html>
