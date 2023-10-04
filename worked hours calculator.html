@@ -32,7 +32,7 @@
             flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         label, input {
@@ -132,3 +132,112 @@
             <p>Total Salary: £<span id="totalSalary">0</span></p>
         </div>
     </div>
+
+    <script>
+       document.addEventListener("DOMContentLoaded", function () {
+    const entriesTable = document.getElementById("entriesTable");
+    const entriesBody = document.getElementById("entriesBody");
+    const totalHoursSpan = document.getElementById("totalHours");
+    const totalSalarySpan = document.getElementById("totalSalary");
+    let editingIndex = -1; // Initialize to -1 to indicate no active editing
+
+// Function to add or update an entry
+function addOrUpdateEntry() {
+    const date = document.getElementById("date").value; 
+    const clockIn = document.getElementById("clockIn").value;
+    const clockOut = document.getElementById("clockOut").value;
+    const breakHours = parseFloat(document.getElementById("breakHours").value) || 0;
+
+    if (date && clockIn && clockOut) {
+        const start = new Date(`${date}T${clockIn}`);
+        const end = new Date(`${date}T${clockOut}`);
+        const workedHours = (end - start) / (1000 * 60 * 60) - breakHours;
+        const salary = workedHours * hourlyRate; 
+
+        if (editingIndex === -1) {
+            // Add a new entry
+            entries.push({ date, clockIn, clockOut, breakHours, workedHours, salary });
+        } else {
+            // Update an existing entry
+            entries[editingIndex] = { date, clockIn, clockOut, breakHours, workedHours, salary };
+            editingIndex = -1; // Reset editing index after updating
+        }
+
+        // Clear the input fields
+        document.getElementById("date").value = "";
+        document.getElementById("clockIn").value = "";
+        document.getElementById("clockOut").value = "";
+        document.getElementById("breakHours").value = "";
+
+        // Re-render the table and recalculate the summary
+        renderEntries();
+        calculateSummary();
+    }
+}
+
+    let entries = [];
+
+    document.getElementById("addEntry").addEventListener("click", addOrUpdateEntry);
+
+    function renderEntries() {
+                entriesBody.innerHTML = "";
+
+                entries.forEach((entry, index) => {
+                    const row = entriesBody.insertRow();
+                    row.innerHTML = `
+                        <td>${entry.date}</td>
+                        <td>${entry.clockIn}</td>
+                        <td>${entry.clockOut}</td>
+                        <td>${entry.breakHours.toFixed(2)}</td>
+                        <td>${entry.workedHours.toFixed(2)}</td>
+                        <td>£${entry.salary.toFixed(2)}</td>
+                        <td><button onclick="editEntry(${index})">Edit</button></td>
+                        <td><button onclick="deleteEntry(${index})">Delete</button></td>
+                    `;
+                });
+            }
+
+              // Function to set the form for editing a specific entry
+              window.editEntry = function (index) {
+                const selectedEntry = entries[index];
+                document.getElementById("date").value = selectedEntry.date;
+                document.getElementById("clockIn").value = selectedEntry.clockIn;
+                document.getElementById("clockOut").value = selectedEntry.clockOut;
+                document.getElementById("breakHours").value = selectedEntry.breakHours;
+                editingIndex = index; // Set editing index to the selected entry
+            };
+
+            function deleteEntry(index) {
+                // Remove the selected entry from the array
+                entries.splice(index, 1);
+
+                // Re-render the table and recalculate the summary
+                renderEntries();
+                calculateSummary();
+            };
+     // Define the deleteEntry function in the global scope
+     window.deleteEntry = function (index) {
+                // Remove the selected entry from the array
+                entries.splice(index, 1);
+
+                // Re-render the table and recalculate the summary
+                renderEntries();
+                calculateSummary();
+            };
+
+
+    function calculateSummary() {
+        const totalHours = entries.reduce((acc, entry) => acc + entry.workedHours, 0);
+        const totalSalary = entries.reduce((acc, entry) => acc + entry.salary, 0);
+
+        totalHoursSpan.textContent = totalHours.toFixed(2);
+        totalSalarySpan.textContent = totalSalary.toFixed(2);
+    }
+
+    // calculating salary on hourly rate = £12.5
+    const hourlyRate = 12.5;
+});
+ 
+    </script>
+</body>
+</html>
